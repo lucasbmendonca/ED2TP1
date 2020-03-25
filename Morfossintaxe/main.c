@@ -3,7 +3,6 @@
 #include <stdbool.h>
 #include "morfossintaxe.h"
 #include "morfossintaxe.c"
-#define C_FILENAME "slate-tagged2.txt"
 
 int main()
 {
@@ -18,9 +17,10 @@ int main()
 
     /*Tratamento do arquivo*/
     FILE* arq;
-    arq = fopen(C_FILENAME,"r");
+    arq = fopen("Morfossintaxe/slate-tagged2.txt","r");
     if(arq==NULL){
         printf("Nao foi possivel abrir o arquivo!\n");
+        perror(arq);
     }
     else{
         //[a-zA-Z]
@@ -46,6 +46,5 @@ int main()
     mostraResultado();
     destroi();
     fclose(arq);
-    printf("ola");
     return 0;
 }

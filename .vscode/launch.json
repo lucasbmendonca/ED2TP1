@@ -8,7 +8,7 @@
             "name": "(gdb) Iniciar",
             "type": "cppdbg",
             "request": "launch",
-            "program": "${workspaceFolder}/Morfossintaxe.c.exe",
+            "program": "${workspaceFolder}/Morfossintaxe/Morfossintaxe.c.exe",
             "args": [],
             "stopAtEntry": false,
             "cwd": "${workspaceFolder}",

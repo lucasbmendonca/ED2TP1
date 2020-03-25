@@ -9,15 +9,16 @@
             "command": "gcc",
             "args": [
                 "-g",
-                "main.c",
+                ".\\Morfossintaxe\\main.c",
                 "-o",
-                "Morfossintaxe.c.exe"
+                ".\\Morfossintaxe\\Morfossintaxe.c.exe"
             ]
         },
         {
             "label": "Run C File",
             "type": "shell",
-            "command": ".\\Morfossintaxe.c.exe",
+            "command": ".\\Morfossintaxe\\Morfossintaxe.c.exe",
+            "problemMatcher": []
         }
     ]
 }
