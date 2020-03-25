@@ -1,0 +1,16 @@
+# depslib dependency file v1.0
+1585080643 source:c:\users\lucas braga mendonça\google drive\ipca\1 ano - 2 semestre\estrutura de dados ii\tp1\morfossintaxe\main.c
+	<stdio.h>
+	<stdlib.h>
+	<stdbool.h>
+	"morfossintaxe.h"
+
+1585081268 source:c:\users\lucas braga mendonça\google drive\ipca\1 ano - 2 semestre\estrutura de dados ii\tp1\morfossintaxe\morfossintaxe.c
+	<stdio.h>
+	<stdlib.h>
+	<string.h>
+	<stdbool.h>
+	"morfossintaxe.h"
+
+1585081428 c:\users\lucas braga mendonça\google drive\ipca\1 ano - 2 semestre\estrutura de dados ii\tp1\morfossintaxe\morfossintaxe.h
+

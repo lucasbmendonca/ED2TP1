@@ -1,0 +1,6 @@
+{
+    "files.associations": {
+        "morfossintaxe.h": "c",
+        "stdio.h": "c"
+    }
+}

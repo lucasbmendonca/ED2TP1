@@ -1,0 +1,3 @@
+think think VBP 0.623514
+A a AAA 1
+have have VBP 1
