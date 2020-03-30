@@ -35,7 +35,7 @@ void mostraResultado(){
         Palavra *p_aux, *palavra_aux;
         printf("\n*************************RESULTADO*************************\n");
         while(l_aux != NULL){
-            printf("----> Categoria: %s || Quantidade: %d\n", l_aux->categoria, l_aux->qtd_palavras);
+            printf("----> Categoria: %s || Quantidade: %d\n", l_aux->texto, l_aux->qtd_palavras);
             p_aux = l_aux->palavra;
             while(p_aux != NULL){
                 printf("<.> Palavra: %s || Tamanho: %d || Quantidade: %d\n", p_aux->texto, p_aux->tamanho, p_aux->quantidade);
@@ -45,6 +45,51 @@ void mostraResultado(){
         }
         printf("***********************************************************\n");
     }
+}
+
+bool checkInput(char value[]){
+//Verificações ASCII    
+    int lenght = strlen(value);
+    int i = 0, result = 0;
+    char c1 = value[0], c2;
+
+    if(lenght > 1){
+   /*Somente caracteres do alfabeto*/
+        if(!( c1 >= 65 && c1 <= 90) || (c1 >= 97 && c1 <= 122)){
+            do{ 
+                c2 = value[i++];
+                if((( c2 >= 65 && c2 <= 90) || (c2 >= 97 && c2 <= 122))){
+                    return true;
+                }else{
+                    //printf("Não inserir: %s\n", value);
+                    return false;
+                }
+            }while(c2 != '\000');
+            /*Caracteres iguais [;;...'']
+            Ex.: Palavra 1 = ;;;
+                 Palavra 2 = --
+            Não devem ser inseridos!
+            Se o numero de caracteres iguais for igual ao tamanho da palavra, 
+            a palavra possui todos os caracteres idênticos.*/
+            if (!(result != lenght + 1)){ 
+                    //printf("Não inserir: %s\n", value);
+                return false;
+            }
+            return true;
+        }else
+        {
+            return true;
+        }
+        
+    }
+    else{
+        if(( c1 >= 65 && c1 <= 90) || (c1 >= 97 && c1 <= 122))
+        {
+            return true;
+        }        
+        //printf("Não inserir: %s\n", value);
+        return false;
+    } 
 }
 
 Palavra* meioPalavra(Palavra *palavra_inicio, Palavra *palavra_fim){
@@ -89,7 +134,7 @@ Palavra* buscaBinariaPalavra(Palavra *p, char* texto){
         if(compare == 0)
         {
             return palavra_meio;
-            break;
+            //break;
         }
         else if(compare < 0){ palavra_fim = palavra_meio; }
         else if(compare > 0){ palavra_inicio = palavra_meio->proximo; }
@@ -100,7 +145,7 @@ Palavra* buscaBinariaPalavra(Palavra *p, char* texto){
         if(palavra_meio == NULL || palavra_anterior == palavra_meio)
         {
             return palavra_anterior;
-            break;
+            //break;
         }
     }
 }
@@ -142,13 +187,13 @@ Categoria* buscaBinariaCategoria(Categoria *l, char* texto){
     if(elemento_meio == NULL){ return l; }
 
     for(;;){
-        int compare = strcmp(texto,elemento_meio->categoria);
+        int compare = strcmp(texto,elemento_meio->texto);
         if(compare == 0)
         {
             /*Adiciona +1 a frequencia da classificacao*/
             elemento_meio->qtd_palavras++;
             return elemento_meio;
-            break;
+            //break;
         }
         else if(compare < 0){ elemento_ultimo = elemento_meio; }
         else if(compare > 0){ elemento_comeco = elemento_meio->proximo; }
@@ -158,13 +203,13 @@ Categoria* buscaBinariaCategoria(Categoria *l, char* texto){
         if(elemento_meio == NULL || elemento_anterior == elemento_meio)
         {
             return elemento_anterior;
-            break;
+            //break
         }
     }
 }
 
-void insereCategoria(Categoria *p_new, Categoria *p_elemento){
-    int compare = strcmp(p_new->categoria, p_elemento->categoria);
+int insereCategoria(Categoria *p_new, Categoria *p_elemento){
+    int compare = strcmp(p_new->texto, p_elemento->texto);
     if (compare < 0)
     {
         p_new->anterior = p_elemento->anterior;
@@ -180,6 +225,7 @@ void insereCategoria(Categoria *p_new, Categoria *p_elemento){
                p_elemento = p_new;
                categoria_header = p_elemento;
         }
+        return true;
     }
     else if(compare > 0)
     {
@@ -192,13 +238,16 @@ void insereCategoria(Categoria *p_new, Categoria *p_elemento){
         /*Inserindo no final*/
         else{ p_new->anterior = p_elemento; }
         p_elemento->proximo = p_new;
+        return true;
     }
+    return false;
 }
 
-void inserePalavra(Palavra *p_new, Palavra *p_palavra, Palavra **p_header){
+int inserePalavra(Palavra *p_new, Palavra *p_palavra, Palavra **p_header){
 
-    int result = strcmp(p_new->texto,p_palavra->texto);
-    if (result < 0)
+    int compare = strcmp(p_new->texto,p_palavra->texto);
+
+    if (compare < 0)
     {
         /*Adicionando +1 a frequencia*/
         p_new->quantidade++;
@@ -210,15 +259,16 @@ void inserePalavra(Palavra *p_new, Palavra *p_palavra, Palavra **p_header){
             p_palavra->anterior->proximo = p_new;
             p_palavra->anterior = p_new;
           }
-        /*Inserindo no come�o*/
+        /*Inserindo no começo da lista de palavras*/
         else
         {
             p_palavra->anterior = p_new;
             p_palavra = p_new;
             *p_header = p_new;
         }
+        return true;
     }
-    else if(result > 0)
+    else if(compare > 0)
     {
         /*Adicionando +1 a frequencia*/
         p_new->quantidade++;
@@ -233,14 +283,20 @@ void inserePalavra(Palavra *p_new, Palavra *p_palavra, Palavra **p_header){
         else{ p_new->anterior = p_palavra; }
 
         p_palavra->proximo = p_new;
+        return true;
     }
-    else if (result == 0){ p_palavra->quantidade++; return; }
+    else if (compare == 0)
+    {
+        p_palavra->quantidade++; 
+        return true; 
+    }
 
+    return false;
 }
 
-void insere(char* texto, char* raiz, char* categoria, double percentagem){
+int insere(char* texto, char* raiz, char* categoria, double percentagem){
     Categoria *new_element = (Categoria *)malloc(sizeof(Categoria));
-    strcpy(new_element->categoria, categoria);
+    strcpy(new_element->texto, categoria);
     new_element->proximo = NULL;
     new_element->anterior = NULL;
 
@@ -249,6 +305,7 @@ void insere(char* texto, char* raiz, char* categoria, double percentagem){
     strcpy(new_palavra->raiz, raiz);
     new_palavra->tamanho = strlen(texto);
     new_palavra->percentagem = percentagem;
+    new_palavra->quantidade = 0;
     new_palavra->proximo = NULL;
     new_palavra->anterior = NULL;
 
@@ -258,28 +315,42 @@ void insere(char* texto, char* raiz, char* categoria, double percentagem){
     if(categoria_header == NULL){
         new_element->palavra->quantidade = 1;
         categoria_header = new_element;
+        return true;
     }
     else
     {
-        Categoria *categoria, *header_categoria;
         Palavra *palavra, *palavra_header_temp;
-        categoria = buscaBinariaCategoria(categoria_header,new_element->categoria);
+        Categoria *categoria = buscaBinariaCategoria(categoria_header,new_element->texto);
+        bool flag_categ_existe = false;
         if (categoria != NULL)
         {
             /* Se a categoria ja esta na lista, guardo inicio da lista de palavras*/
-            if (strcmp(new_element->categoria,categoria->categoria) == 0){
+            if (strcmp(new_element->texto,categoria->texto) == 0){
                 palavra_header_temp = categoria->palavra;
+                flag_categ_existe = true; //Categoria ja esta presente na lista
             }
             /*Se nao estiver, o inicio da lista de palavras esta sendo criado agora*/
             else{
                 palavra_header_temp = new_element->palavra;
             }
-            insereCategoria(new_element, categoria);
-             /*Tratar palavra*/
-            palavra = buscaBinariaPalavra(palavra_header_temp,new_element->palavra->texto);
-            if (palavra != NULL){
-                    inserePalavra(new_element->palavra, palavra, &categoria->palavra);
+        
+            //Se a categoria nao existe, insiro
+            if(!flag_categ_existe){
+                flag_categ_existe = insereCategoria(new_element, categoria);
+            }
+
+            /*Tratar palavra*/
+            if(flag_categ_existe){ //Se a categoria foi inserida com sucesso ou já existia na lista
+                palavra = buscaBinariaPalavra(palavra_header_temp,new_element->palavra->texto);
+                if (palavra != NULL){
+                    return inserePalavra(new_element->palavra, palavra, &categoria->palavra);
+                }
+            }
+            else
+            {
+                return false;
             }
         }
     }
+    return false;
 }

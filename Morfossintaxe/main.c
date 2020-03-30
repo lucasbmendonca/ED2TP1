@@ -17,30 +17,39 @@ int main()
 
     /*Tratamento do arquivo*/
     FILE* arq;
-    arq = fopen("Morfossintaxe/slate-tagged2.txt","r");
+    arq = fopen("Morfossintaxe/slate-tagged3.txt","r");
     if(arq==NULL){
         printf("Nao foi possivel abrir o arquivo!\n");
-        perror(arq);
     }
     else{
         //[a-zA-Z]
-        lv_result = fscanf(arq,"%s %s %s %lf\n",lv_texto,lv_raiz,lv_categoria,&lv_percentagem);
+        //lv_result = fscanf(arq,"%s %s %s %lf\n",lv_texto,lv_raiz,lv_categoria,&lv_percentagem);
         do{
+            lv_result = fscanf(arq,"%s %s %s %lf\n",lv_texto,lv_raiz,lv_categoria,&lv_percentagem);
             switch(lv_result){
                 case EOF:
                     isEndOfFile = true;
                     break;
-                case 0:
-                    /*Ler a linha novamente, já que um caracter especial foi encontrado.
-                    Embora essa leitura seja ignorada, serve para ler a proxima linha da iteracao.*/
-                    fscanf(arq,"%s %s %s %s\n");
+                case 4:
+                    printf("Inserindo... Palavra: %s | Raiz: %s | Categoria: %s | Percentagem: %lf\n",lv_texto,lv_raiz,lv_categoria,lv_percentagem);
+                    if (checkInput(lv_texto)){
+                        if(insere(lv_texto,lv_raiz,lv_categoria,lv_percentagem)){
+                            printf("SUCCESS: Palavra %s inserida com sucesso!\n",lv_texto);
+                        }
+                        else
+                        { 
+                            printf("ERROR: Ocorreu um erro desconhecido ao inserir %s.\n", lv_texto);
+                        }
+                    }else{
+                        printf("WARNING: Palavra %s nao foi inserida. Caracter invalido.\n", lv_texto);
+                    }
                     break;
                 default:
-                    printf("Inserindo... Palavra: %s | Raiz: %s | Categoria: %s | Percentagem: %lf\n",lv_texto,lv_raiz,lv_categoria,lv_percentagem);
-                    insere(lv_texto,lv_raiz,lv_categoria,lv_percentagem);
-                    break;
+                   /*Ler a linha novamente.
+                    Embora essa leitura seja ignorada, serve para ler a proxima linha da iteracao.
+                    fscanf(arq,"%s %s %s %s\n");*/
+                    break;    
             }
-            lv_result = fscanf(arq,"%s %s %s %lf\n",lv_texto,lv_raiz,lv_categoria,&lv_percentagem);
         }while(!isEndOfFile);
     }
     mostraResultado();

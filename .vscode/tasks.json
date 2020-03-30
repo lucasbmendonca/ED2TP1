@@ -12,7 +12,8 @@
                 ".\\Morfossintaxe\\main.c",
                 "-o",
                 ".\\Morfossintaxe\\Morfossintaxe.c.exe"
-            ]
+            ],
+            "problemMatcher": []
         },
         {
             "label": "Run C File",

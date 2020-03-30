@@ -12,9 +12,9 @@ typedef struct palavra{
     struct palavra *anterior;
 } Palavra;
 
-// Categoria de palavras de acordo com sua classifica��o
+// Categoria de palavras de acordo com sua classificação
 typedef struct categoria{
-    char categoria[10]; //analise morfossintatica
+    char texto[10]; //analise morfossintatica
     int qtd_palavras; //quantidade palavras
     Palavra *palavra;
     struct categoria *proximo;
@@ -24,15 +24,15 @@ typedef struct categoria{
 Categoria *categoria_header;
 
 void iniciar();
-void insere(char* texto, char* raiz, char* categoria, double percentagem);
+int insere(char* texto, char* raiz, char* categoria, double percentagem);
 Palavra* meioPalavra(Palavra *comeco_el, Palavra *ultimo_el);
 Categoria* meioCategoria(Categoria *comeco_el, Categoria *ultimo_el);
 Palavra* buscaBinariaPalavra(Palavra *p, char* texto);
 Categoria* buscaBinariaCategoria(Categoria *l, char* texto);
-void insereCategoria(Categoria *p_new, Categoria *p_elemento);
-void inserePalavra(Palavra  *p_new, Palavra *p_palavra, Palavra **p_header);
+int insereCategoria(Categoria *p_new, Categoria *p_elemento);
+int inserePalavra(Palavra  *p_new, Palavra *p_palavra, Palavra **p_header);
 void mostraResultado();
-
 void destroi();
+bool checkInput(char value[]);
 
 #endif // MORFOSSINTAXE_H_INCLUDED
