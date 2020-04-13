@@ -52,7 +52,8 @@ int main()
             }
         }while(!isEndOfFile);
     }
-    mostraResultado();
+    Categoria* lista = getResultado();
+    calcularFrequencias(lista);
     destroi();
     fclose(arq);
     return 0;

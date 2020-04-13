@@ -21,18 +21,31 @@ typedef struct categoria{
     struct categoria *anterior;
 } Categoria;
 
+typedef struct frequencia{
+    char variavel[100];
+    int freq_abs;
+    float freq_rel;
+    int freq_abs_acumulada;
+    float freq_rel_acumulada;
+    struct frequencia *proximo;
+} Frequencia;
+
 Categoria *categoria_header;
+Frequencia *frequencia_header;
+int totalCategorias = 0;
+int totalPalavras = 0;
 
 void iniciar();
 int insere(char* texto, char* raiz, char* categoria, double percentagem);
 Palavra* meioPalavra(Palavra *comeco_el, Palavra *ultimo_el);
-Categoria* meioCategoria(Categoria *comeco_el, Categoria *ultimo_el);
+Categoria* acharMeio(Categoria *comeco_el, Categoria *ultimo_el);
 Palavra* buscaBinariaPalavra(Palavra *p, char* texto);
-Categoria* buscaBinariaCategoria(Categoria *l, char* texto);
+Categoria* buscaBinaria(Categoria *l, char* texto);
 int insereCategoria(Categoria *p_new, Categoria *p_elemento);
 int inserePalavra(Palavra  *p_new, Palavra *p_palavra, Palavra **p_header);
-void mostraResultado();
+Categoria* getResultado();
 void destroi();
 bool checkInput(char value[]);
+int calcularFrequencias(Categoria *lista);
 
 #endif // MORFOSSINTAXE_H_INCLUDED

@@ -29,7 +29,7 @@ void destroi(){
     }
 }
 
-void mostraResultado(){
+Categoria* getResultado(){
     if(categoria_header != NULL){
         Categoria *l_aux = categoria_header;
         Palavra *p_aux, *palavra_aux;
@@ -45,6 +45,7 @@ void mostraResultado(){
         }
         printf("***********************************************************\n");
     }
+    return categoria_header;
 }
 
 bool checkInput(char value[]){
@@ -132,9 +133,9 @@ Palavra* buscaBinariaPalavra(Palavra *p, char* texto){
     for(;;){
         int compare = strcmp(texto,palavra_meio->texto);
         if(compare == 0)
-        {
+        {   
+            totalPalavras++;
             return palavra_meio;
-            //break;
         }
         else if(compare < 0){ palavra_fim = palavra_meio; }
         else if(compare > 0){ palavra_inicio = palavra_meio->proximo; }
@@ -143,14 +144,14 @@ Palavra* buscaBinariaPalavra(Palavra *p, char* texto){
         palavra_meio = meioPalavra(palavra_inicio,palavra_fim);
 
         if(palavra_meio == NULL || palavra_anterior == palavra_meio)
-        {
+        {   
+            totalPalavras++;
             return palavra_anterior;
-            //break;
         }
     }
 }
 
-Categoria* meioCategoria(Categoria* comeco_el, Categoria* ultimo_el){
+Categoria* acharMeio(Categoria* comeco_el, Categoria* ultimo_el){
 
         if (comeco_el == NULL){ return NULL; }
         if (comeco_el->proximo == ultimo_el){ return comeco_el; }
@@ -177,13 +178,13 @@ Categoria* meioCategoria(Categoria* comeco_el, Categoria* ultimo_el){
         return p_devagar;
 }
 
-Categoria* buscaBinariaCategoria(Categoria *l, char* texto){
+Categoria* buscaBinaria(Categoria *l, char* texto){
     /*Auxiliares*/
     Categoria* elemento_comeco = l;
     Categoria* elemento_ultimo = NULL;
     Categoria* elemento_meio, *elemento_anterior;
 
-    elemento_meio = meioCategoria(elemento_comeco,elemento_ultimo);
+    elemento_meio = acharMeio(elemento_comeco,elemento_ultimo);
     if(elemento_meio == NULL){ return l; }
 
     for(;;){
@@ -199,7 +200,7 @@ Categoria* buscaBinariaCategoria(Categoria *l, char* texto){
         else if(compare > 0){ elemento_comeco = elemento_meio->proximo; }
 
         elemento_anterior = elemento_meio;
-        elemento_meio = meioCategoria(elemento_comeco,elemento_ultimo);
+        elemento_meio = acharMeio(elemento_comeco,elemento_ultimo);
         if(elemento_meio == NULL || elemento_anterior == elemento_meio)
         {
             return elemento_anterior;
@@ -320,7 +321,7 @@ int insere(char* texto, char* raiz, char* categoria, double percentagem){
     else
     {
         Palavra *palavra, *palavra_header_temp;
-        Categoria *categoria = buscaBinariaCategoria(categoria_header,new_element->texto);
+        Categoria *categoria = buscaBinaria(categoria_header,new_element->texto);
         bool flag_categ_existe = false;
         if (categoria != NULL)
         {
@@ -337,6 +338,7 @@ int insere(char* texto, char* raiz, char* categoria, double percentagem){
             //Se a categoria nao existe, insiro
             if(!flag_categ_existe){
                 flag_categ_existe = insereCategoria(new_element, categoria);
+                totalCategorias++;
             }
 
             /*Tratar palavra*/
@@ -353,4 +355,85 @@ int insere(char* texto, char* raiz, char* categoria, double percentagem){
         }
     }
     return false;
+}
+
+int insereFrequenciaOrdenada(Frequencia** frequencia){
+
+    if (frequencia == NULL){
+        return false;
+    }
+
+    if(frequencia_header == NULL){
+        frequencia_header = *frequencia;
+        return true;
+    }
+
+    Frequencia *elemento = NULL;
+    Frequencia *elemento_anterior = NULL;
+    elemento = frequencia_header;
+    do{
+        if(elemento->freq_abs < (*frequencia)->freq_abs){
+             elemento_anterior = elemento;
+             elemento = elemento->proximo;
+        }
+        else if((elemento->freq_abs > (*frequencia)->freq_abs) || (elemento->freq_abs == (*frequencia)->freq_abs)){
+            if (elemento_anterior == NULL){
+                (*frequencia)->proximo = frequencia_header;
+                frequencia_header = (*frequencia);
+                return true;
+            }
+            elemento_anterior->proximo = (*frequencia);
+            (*frequencia)->proximo = elemento;
+            return true;
+        }
+    }while(elemento != NULL);
+
+    elemento_anterior->proximo = (*frequencia);
+    return true;
+}
+
+int calcularFrequencias(Categoria* lista){
+
+    Frequencia* frequencia;
+    Categoria* categoria = lista;
+    
+    while(categoria != NULL){
+        frequencia = (Frequencia *)malloc(sizeof(Frequencia));
+        frequencia->proximo = NULL;
+        strcpy(frequencia->variavel,categoria->texto);
+        frequencia->freq_abs = categoria->qtd_palavras;
+        frequencia->freq_rel = (frequencia->freq_abs/(float)totalPalavras)*100;
+        frequencia->freq_abs_acumulada = 0;
+        frequencia->freq_rel_acumulada = 0;
+        insereFrequenciaOrdenada(&frequencia);
+        categoria = categoria->proximo;
+    }
+
+    /*Guardo anterior e seto freq. absoluta e relativa acumuladas do primeiro elemento*/
+    Frequencia *frequencia_ant = frequencia_header;
+    frequencia_ant->freq_abs_acumulada = frequencia_ant->freq_abs;
+    frequencia_ant->freq_rel_acumulada = frequencia_ant->freq_rel;
+    
+    /*Calculo demais frequencias acumuladas*/
+    frequencia = frequencia_header->proximo;
+    while(frequencia != NULL){
+         frequencia->freq_abs_acumulada = frequencia->freq_abs + frequencia_ant->freq_abs_acumulada;
+         frequencia->freq_rel_acumulada = frequencia->freq_rel + frequencia_ant->freq_rel_acumulada;
+         frequencia_ant = frequencia;
+         frequencia = frequencia->proximo;
+    }
+    
+    frequencia = frequencia_header;
+    printf("%-10s%-20s%-10s%-10s%-10%s\n", "X", "ni", "fi", 
+    "Ni", "Fi");
+    while(frequencia != NULL){
+        printf("%-10s%-20d%-10.2f%-10.d%-10.2f\n",frequencia->variavel, frequencia->freq_abs, 
+        frequencia->freq_rel, frequencia->freq_abs_acumulada, frequencia->freq_rel_acumulada);
+         frequencia = frequencia->proximo;
+    }
+
+    while(frequencia_header!=NULL){
+        frequencia_header =  frequencia->proximo;
+        free(frequencia);
+    }
 }
