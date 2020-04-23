@@ -41,7 +41,7 @@ int main()
                             printf("ERROR: Ocorreu um erro desconhecido ao inserir %s.\n", lv_texto);
                         }
                     }else{
-                        printf("WARNING: Palavra %s nao foi inserida. Caracter invalido.\n", lv_texto);
+                        printf("ERROR: Palavra %s nao foi inserida. Caracter invalido.\n", lv_texto);
                     }
                     break;
                 default:
