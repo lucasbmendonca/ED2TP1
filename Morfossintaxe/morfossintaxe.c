@@ -9,7 +9,7 @@
 void iniciar(){
     categoria_header = NULL;
     freq_categoria_h = NULL;
-    freq_tamamanho_palavra_h = NULL;
+    freq_tamanho_palavra_h = NULL;
 }
 
 void destroi(){
@@ -364,6 +364,7 @@ int insereFrequenciaTamOrdenada(Frequencia** frequencia, Frequencia** header){
 
     if(*header == NULL){
         *header = *frequencia;
+        totalTamanhoPalavras++;
         return true;
     }
 
@@ -394,15 +395,18 @@ int insereFrequenciaTamOrdenada(Frequencia** frequencia, Frequencia** header){
             if (elemento_anterior == NULL){
                 (*frequencia)->proximo = *header;
                 *header = (*frequencia);
+                totalTamanhoPalavras++;
                 return true;
             }
             elemento_anterior->proximo = (*frequencia);
             (*frequencia)->proximo = elemento;
+            totalTamanhoPalavras++;
             return true;
         }
     }while(elemento != NULL);
 
     elemento_anterior->proximo = (*frequencia);
+    totalTamanhoPalavras++;
     return true;
 }
 
@@ -494,7 +498,7 @@ int calcularFrequencias(Categoria* lista){
         double media = 0;
         //FIM - QUESTAO 4
 
-        /*Frequencia relativa ao tamanho das palavras*/
+        /*Frequencias: tamanho das palavras*/
         Palavra *palavra = categoria->palavra;
         while(palavra != NULL){
             frequencia = (Frequencia *)malloc(sizeof(Frequencia));
@@ -506,11 +510,13 @@ int calcularFrequencias(Categoria* lista){
             frequencia->freq_rel = (frequencia->freq_abs/(float)totalPalavras)*100;
             frequencia->freq_abs_acumulada = 0;
             frequencia->freq_rel_acumulada = 0;
-            insereFrequenciaTamOrdenada(&frequencia, &freq_tamamanho_palavra_h);
+            insereFrequenciaTamOrdenada(&frequencia, &freq_tamanho_palavra_h);
             
             somatorioCertezaFrequencia = somatorioCertezaFrequencia + 
             (palavra->quantidade * palavra->percentagem); //QUESTAO 4
-            
+
+            ma_tam_palavra = ma_tam_palavra + (palavra->tamanho*palavra->quantidade); //QUESTAO 5
+
             palavra = palavra->proximo;    
         }
 
@@ -520,11 +526,11 @@ int calcularFrequencias(Categoria* lista){
         double variancia = 0;
         palavra = categoria->palavra;
         while(palavra != NULL){
-            variancia = variancia + pow((palavra->percentagem - media),2);
+            variancia = variancia + pow(((palavra->percentagem - media)*palavra->quantidade),2);
             palavra = palavra->proximo;    
         }
-        double desvioPadrao = sqrt(variancia);
-        med_desv_cat->desvio_padrao = desvioPadrao;
+        variancia = variancia/(categoria->qtd_palavras - 1);
+        med_desv_cat->desvio_padrao = sqrt(variancia);;
         insereMedDesv(&med_desv_cat);
         //FIM - QUESTAO 4
 
@@ -545,17 +551,56 @@ int calcularFrequencias(Categoria* lista){
     }
 
     /*Guardo anterior e seto freq. absoluta e relativa acumuladas do primeiro elemento*/
-    frequencia_ant = freq_tamamanho_palavra_h;
+    frequencia_ant = freq_tamanho_palavra_h;
     frequencia_ant->freq_abs_acumulada = frequencia_ant->freq_abs;
     frequencia_ant->freq_rel_acumulada = frequencia_ant->freq_rel;
+
+    /*Questao 5 Medidas de localização e dispersão: tamanho das palavras*/
+    //INICIO - QUESTAO 5
+    ma_tam_palavra = ma_tam_palavra/totalPalavras;
+
+    //Moda
+    int tamanho = atoi(frequencia_ant->variavel);
+    int maiorFrequencia = frequencia_ant->freq_abs;
+    moda_tam_palavra = tamanho;
+    
+    //Mediana
+    int posicao_mediana;
+    if(totalPalavras%2 != 0){
+        posicao_mediana = ((totalTamanhoPalavras + 1)/2);
+    }
+    else{
+        posicao_mediana = ( ( (totalTamanhoPalavras/2) + ((totalPalavras + 1)/2) / 2) );
+    } 
+
+    //Variancia
+    double variancia = pow(((tamanho - ma_tam_palavra)*maiorFrequencia),2);
+
     /*Calculo demais frequencias acumuladas*/
-    frequencia = freq_tamamanho_palavra_h->proximo;
+    frequencia = freq_tamanho_palavra_h->proximo;
+    int posicao = 0;
     while(frequencia != NULL){
+        tamanho = atoi(frequencia->variavel); //Variavel que contém o tamanho da palavra
+         /*Inicio - Questao5*/
+         posicao++;
+         if (posicao == posicao_mediana){
+             mediana_tam_palavra = tamanho; //Posição da mediana recebe variavel de tamanho
+         }
+         if(frequencia->freq_abs > maiorFrequencia){
+             maiorFrequencia = frequencia->freq_abs; //Elemento de maior frequencia absoluta será a moda
+             moda_tam_palavra = tamanho;
+         }
+         variancia = variancia + pow(((tamanho - ma_tam_palavra)*frequencia->freq_abs),2);
+        /*Fim - Questao5*/
+
          frequencia->freq_abs_acumulada = frequencia->freq_abs + frequencia_ant->freq_abs_acumulada;
          frequencia->freq_rel_acumulada = frequencia->freq_rel + frequencia_ant->freq_rel_acumulada;
          frequencia_ant = frequencia;
          frequencia = frequencia->proximo;
     }
+    variancia = variancia/(totalPalavras-1);
+    //desvio padrao
+    desvio_padrao_tam_palavra = sqrt(variancia); //QUESTAO 5
     
     /*print da tabela de frequencias das categorias*/
     frequencia = freq_categoria_h;
@@ -568,7 +613,7 @@ int calcularFrequencias(Categoria* lista){
     }
 
     /*print da tabela de frequencias dos tamanhos das palavras*/
-    frequencia = freq_tamamanho_palavra_h;
+    frequencia = freq_tamanho_palavra_h;
     printf("\nTabela de Frequencias do tamanho das palavras:\n");
     printf("%-10s%-10s%-10s%-10s%-10s\n", "X", "ni", "fi", "Ni", "Fi");
     while(frequencia != NULL){
@@ -587,13 +632,13 @@ int calcularFrequencias(Categoria* lista){
         elemento = elemento->proximo;
     }
 
-    while(freq_tamamanho_palavra_h!=NULL){
-        freq_tamamanho_palavra_h =  frequencia->proximo;
+    /*while(freq_tamanho_palavra_h!=NULL){
+        freq_tamanho_palavra_h =  frequencia->proximo;
         free(frequencia);
-    }
+    }*/
 
-    while(freq_categoria_h!=NULL){
+    /*while(freq_categoria_h!=NULL){
         freq_categoria_h =  frequencia->proximo;
         free(frequencia);
-    }
+    }*/
 }

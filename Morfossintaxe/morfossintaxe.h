@@ -39,6 +39,14 @@ typedef struct medDesvCat{
     struct medDesvCat *proximo;
 } MedDesvCat;
 
+/*Medidas de localização e dispersao, relativas ao tamanho das palavras: media
+aritmetica, mediana, moda e desvio padrao.*/
+int totalTamanhoPalavras = 0; //Quantos diferentes tamanhos de palavras existem
+double ma_tam_palavra = 0;
+double mediana_tam_palavra = 0;
+int moda_tam_palavra = 0;
+double desvio_padrao_tam_palavra = 0;
+
 /*Inicio da lista de categorias com palavras*/
 Categoria *categoria_header;
 
@@ -46,7 +54,7 @@ Categoria *categoria_header;
 Frequencia *freq_categoria_h; //h = header
 
 /*Inicio da lista de frequencias do tamanho das palavras*/
-Frequencia *freq_tamamanho_palavra_h;
+Frequencia *freq_tamanho_palavra_h;
 
 /*Inicio da lista de media e desvio padrão com base na certeza de etiquetação*/
 MedDesvCat *med_desv_h;
