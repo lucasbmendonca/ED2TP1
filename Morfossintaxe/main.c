@@ -73,6 +73,10 @@ int main()
     scanf("%s",texto);
     getQuartil(texto);
 
+    /*Questao 7 - Histograma de probabilidades de acordo com a certeza de etiquetação*/
+    calcHistograma();
+    showHistograma();
+
     /*Destroi todas as listas geradas pelo programa*/
     destroi();
 

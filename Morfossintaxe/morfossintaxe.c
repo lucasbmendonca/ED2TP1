@@ -659,6 +659,55 @@ int insereFreqPalavraOrdenada(Palavra *palavra)
     }
 }
 
+int insereFrequenciaCertezaOrd(Palavra *palavra){
+    
+    if(palavra != NULL){
+        FrequenciaCerteza* freq_certeza = (FrequenciaCerteza *)malloc(sizeof(FrequenciaCerteza));
+        double percentagem = (double) palavra->percentagem * (double) 100.00000000000001;
+        freq_certeza->certeza = percentagem;
+        freq_certeza->proximo = NULL;
+
+         if (freq_certeza_h == NULL)
+        {
+            freq_certeza_h = freq_certeza;
+            return true;
+        }
+
+        FrequenciaCerteza* elemento_atual = freq_certeza_h;
+        FrequenciaCerteza* elemento_anterior = NULL;
+        while(elemento_atual!=NULL){
+
+            if(freq_certeza->certeza < elemento_atual->certeza || freq_certeza->certeza == elemento_atual->certeza)
+            {
+                if(elemento_anterior == NULL) //Inserindo no começo da lista
+                { 
+                    freq_certeza->proximo = freq_certeza_h;
+                    freq_certeza_h = freq_certeza;
+                    return true;
+                }
+                if( freq_certeza->certeza == elemento_atual->certeza){
+                    elemento_atual->frequencia++;
+                    freq_certeza_h->frequencia = elemento_atual->frequencia;
+                }
+                //Inserindo entre dois elementos
+                freq_certeza->proximo = elemento_anterior->proximo;
+                elemento_anterior->proximo = freq_certeza;
+                return true;
+            }
+            elemento_anterior = elemento_atual;
+            elemento_atual = elemento_atual->proximo;
+        }
+
+        //Insere no fim
+        if (elemento_atual == NULL)
+        {
+            elemento_anterior->proximo = freq_certeza;
+            return true;
+        }
+        return false; 
+    }
+}
+
 /*
   -------------------------------------------------------------------------------------------------
   Descrição: Metodo responsável por calcular as frequencias e medidas das questões 2, 3, 4, 5, 6.
@@ -678,11 +727,19 @@ int insereFreqPalavraOrdenada(Palavra *palavra)
   Resolução Questão 6: COD-005 > Calcular os valores de quartis, de acordo com a categoria gramatical,
                                  para uso posteior na função getQuartil() que, dada uma palavra indicada 
                                  pelo utilizador, permite obter, o quartil a que pertence.
+  Resolução Questão 7: COD-006 > Histograma de probabilidades                               
 */
 int calcFreqMed(Categoria *lista)
 {
     Frequencia *frequencia;
     Categoria *categoria = lista;
+
+    /*INI - COD-006
+    Informações associadas ao histograma de probabilidades
+    */
+    menorCertezaHistograma = 100.00000000000001;
+    maiorCertezaHistograma = 0.0000000000000001;
+    /*FIM - COD-006*/
 
     while (categoria != NULL)
     {
@@ -733,6 +790,17 @@ int calcFreqMed(Categoria *lista)
             /*INI COD-005*/
             insereFreqPalavraOrdenada(palavra);
             /*FIM - COD-005*/
+
+            /*INI - COD-006*/
+            double percentagem_aux = palavra->percentagem * 100.00000000000001; //Transformar 0,20 em 20%
+            if(percentagem_aux < menorCertezaHistograma ){
+                menorCertezaHistograma = percentagem_aux;
+            }
+            if(percentagem_aux > maiorCertezaHistograma){
+                maiorCertezaHistograma = percentagem_aux;
+            }
+            insereFrequenciaCertezaOrd(palavra);
+            /*FIM - COD-006*/
 
             palavra = palavra->proximo;
         }
@@ -979,7 +1047,7 @@ void calculaQuartil(){
     }
     quartil_3 = mediana;
 
-    printf("\nQuartil 1: %.2f | Quartil 2: %.2f | Quartil 3: %.2f", quartil_1, quartil_2, quartil_3); 
+    printf("\nQuartil 1: %.2f | Quartil 2: %.2f | Quartil 3: %.2f\n", quartil_1, quartil_2, quartil_3); 
 }
 
 int getQuartil(char texto[]){
@@ -1012,5 +1080,74 @@ int getQuartil(char texto[]){
         }
         printf("\nPalavra nao esta presente no Rol.");
         return false;
+    }
+}
+
+int insereHistograma(double limite_inferior, double limite_superior, int frequencia, double ponto_medio){
+
+    Histograma* histograma = (Histograma *)malloc(sizeof(Histograma));
+    histograma->limite_inferior = limite_inferior;
+    histograma->limite_superior = limite_superior;
+    histograma->freq_abs = frequencia;
+    histograma->freq_rel = ((frequencia)/(double)totalPalavras) * 100;
+    histograma->ponto_medio = ponto_medio;
+    histograma->proximo = NULL; 
+
+    if(histograma_h == NULL){
+        histograma_h = histograma;
+        histograma_fim = histograma;
+        return true;
+    }
+    //Inserindo sempre no fim
+    Histograma* aux = histograma_fim;
+    histograma_fim = histograma;
+    aux->proximo = histograma;
+    return true; 
+}
+
+void calcHistograma(){
+    if(freq_certeza_h != NULL){
+        
+        double n_elemento = maiorCertezaHistograma - menorCertezaHistograma;
+        double num_classes = 1 + 3.3 * log10(totalPalavras);
+        double amplitude = n_elemento/num_classes;
+        double soma_amplitude = amplitude;
+
+        double limite_inferior = menorCertezaHistograma;
+        double limite_superior;
+        double ponto_medio;
+        double frequencia = 0.00000000001;
+
+        FrequenciaCerteza* elemento_atual = freq_certeza_h;
+        FrequenciaCerteza* elemento_anterior;
+        while(elemento_atual!=NULL){
+            frequencia += 1.0; 
+            if(elemento_atual->certeza > soma_amplitude){
+                limite_superior = elemento_anterior->certeza;
+                ponto_medio = (limite_superior+limite_inferior)/(double) 2.0;
+                insereHistograma(limite_inferior, limite_superior, frequencia, ponto_medio);
+                limite_inferior = soma_amplitude;
+                frequencia = 0;
+                soma_amplitude = soma_amplitude + amplitude;
+            }
+            elemento_anterior = elemento_atual;
+            elemento_atual = elemento_atual->proximo;
+        }
+        //Calculo para ultima classe
+        limite_superior = elemento_anterior->certeza;
+        ponto_medio = (limite_superior+limite_inferior)/(double) 2.0;
+        insereHistograma(limite_inferior, limite_superior, frequencia, ponto_medio);
+    }
+}
+
+void showHistograma(){
+    if(histograma_h != NULL){
+        Histograma* elemento = histograma_h;
+        printf("\n\nHistograma:\n");
+        printf("\n%-20s%-20s%-20s", "Classes", "Frequencia abs.", "Ponto Medio"); 
+        while(elemento != NULL){
+            printf("\n%-10.2lf%-10.2lf%-20.d%-20.2lf", elemento->limite_inferior, elemento->limite_superior, elemento->freq_abs, elemento->ponto_medio);
+            elemento = elemento->proximo;
+        }
     }
 }

@@ -46,6 +46,22 @@ typedef struct freqPalavras{
     struct freqPalavras *proximo;
 } FreqPalavras;
 
+/*Estrutura para histograma de probabilidades*/
+typedef struct histograma{
+    double limite_inferior;
+    double limite_superior;
+    int freq_abs;
+    double freq_rel;
+    double ponto_medio;
+    struct histograma *proximo;
+} Histograma;
+
+typedef struct frequenciaCerteza{
+    double certeza;
+    int frequencia;
+    struct frequenciaCerteza* proximo;
+} FrequenciaCerteza;
+
 /*Inicio da lista de categorias com palavras.*/
 Categoria *categoria_header;
 
@@ -63,6 +79,13 @@ MedDesvCat *med_desv_ultimo;
 
 /*Inicio da Frequencia de Palavras*/
 FreqPalavras *freq_palavras_h;
+
+/*Inicio da lista do histograma de probabilidades com base na certeza de etiquetação*/
+Histograma* histograma_h;
+Histograma* histograma_fim;
+FrequenciaCerteza* freq_certeza_h;
+double maiorCertezaHistograma;
+double menorCertezaHistograma;
 
 int totalCategorias = 0; //Total de categorias durante a execução do programa.
 int totalPalavras = 0; //Total de palavras lidas do arquivo.
@@ -98,13 +121,16 @@ int insereFrequenciaCatOrdenada(Frequencia** frequencia, Frequencia** header); /
 int insereFrequenciaTamOrdenada(Frequencia** frequencia, Frequencia** header); //Frequencia da incidencia do tamanho das palavras.
 int insereMedDesv(MedDesvCat** med_desv); //Insere na lista de media e desvio padrão com base na etiquetação.
 int insereFreqPalavraOrdenada(Palavra* palavra); //Insere na lista de Frequencia das palavras.
-int getQuartil(char texto[]);
+int getQuartil(char texto[]);//Retorna quartil de acordo com palavra informada
 void calculaQuartil(); //Calcula Quartis das Frequencias de Palavras;
+int insereHistograma(double limite_inferior, double limite_superior, int frequencia, double ponto_medio);
+int insereFrequenciaCertezaOrd(Palavra *palavra);
 
 void showFreqTamPalavras();
 void showFreqCategorias();
 void showMedDesvCat();
 void showLocDisp();
 void showFreqPalavras();
+void calcHistograma();
 
 #endif // MORFOSSINTAXE_H_INCLUDED
