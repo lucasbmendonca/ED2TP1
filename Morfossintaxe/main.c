@@ -22,8 +22,6 @@ int main()
         printf("Nao foi possivel abrir o arquivo!\n");
     }
     else{
-        //[a-zA-Z]
-        //lv_result = fscanf(arq,"%s %s %s %lf\n",lv_texto,lv_raiz,lv_categoria,&lv_percentagem);
         do{
             lv_result = fscanf(arq,"%s %s %s %lf\n",lv_texto,lv_raiz,lv_categoria,&lv_percentagem);
             switch(lv_result){
@@ -45,16 +43,32 @@ int main()
                     }
                     break;
                 default:
-                   /*Ler a linha novamente.
-                    Embora essa leitura seja ignorada, serve para ler a proxima linha da iteracao.
-                    fscanf(arq,"%s %s %s %s\n");*/
                     break;    
             }
         }while(!isEndOfFile);
     }
-    Categoria* lista = getResultado();
-    calcularFrequencias(lista);
+    /*Lista principal do programa com categorias e suas palavras ordenadas*/
+    Categoria* categoriaPalavras_list = getResultado();
+
+    /*Calculo de Frequencias e Medias relativas as questões do trabalho*/
+    calcFreqMed(categoriaPalavras_list);
+
+    /*Questao 2 - Mostrar tabela de frequencias com relação a classe gramatical utilizada*/
+    showFreqCategorias(); 
+
+    /*Questao 3 - Mostrar tabela de frequencias com relação ao tamanho das palavras*/
+    showFreqTamPalavras();
+
+    /*Questao 4 - Mostrar resultado das medias e desvio padrão com base na medida de etiquetação*/
+    showMedDesvCat();
+
+    /*Questao 5 - Mostrar resultado das medidas de dispersão e localização relativas ao tamanho das palavras*/
+    showLocDisp();
+
+    /*Destroi todas as listas geradas pelo programa*/
     destroi();
+
+    /*Fecho o arquivo*/
     fclose(arq);
     return 0;
 }

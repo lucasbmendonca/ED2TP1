@@ -6,13 +6,16 @@
 #include <math.h>
 #include "morfossintaxe.h"
 
+/*Inicializa listas do programa*/
 void iniciar(){
     categoria_header = NULL;
     freq_categoria_h = NULL;
     freq_tamanho_palavra_h = NULL;
 }
 
+/*Libera memória do programa destruindo as listas*/
 void destroi(){
+    //Destroi lista de categorias com suas palavras
     if(categoria_header != NULL){
         Categoria *elemento_aux;
         Categoria *l_aux = categoria_header;
@@ -29,8 +32,23 @@ void destroi(){
             }
         }
     }
+    /*Destroi lista de frequencias de tamanho da palavra*/
+    Frequencia* frequencia = freq_tamanho_palavra_h;
+    while(frequencia!=NULL){
+        Frequencia* frequencia_aux = frequencia->proximo;
+        free(frequencia);
+        frequencia = frequencia_aux;
+    }
+    /*Destroi lista de frequencias de categorias*/
+    frequencia = freq_categoria_h;
+    while(frequencia!=NULL){
+        Frequencia* frequencia_aux = frequencia->proximo;
+        free(frequencia);
+        frequencia = frequencia_aux;
+    }
 }
 
+/*Retorna resultado da lista principal do programa: Categorias ordenadas com suas palavras ordenadas*/
 Categoria* getResultado(){
     if(categoria_header != NULL){
         Categoria *l_aux = categoria_header;
@@ -50,6 +68,7 @@ Categoria* getResultado(){
     return categoria_header;
 }
 
+/*Verifica input do TXT*/
 bool checkInput(char value[]){
     /*Verificações ASCII*/   
     int lenght = strlen(value);
@@ -92,12 +111,13 @@ bool checkInput(char value[]){
     } 
 }
 
+/*Retorna a palavra que está no meio da Lista de Palavras*/
 Palavra* acharMeioPalavra(Palavra *comeco_el, Palavra *ultimo_el){
 
        if (comeco_el == NULL){ return NULL; }
        if (comeco_el->proximo == ultimo_el){ return comeco_el; }
 
-        /*Variaveis auxiliar*/
+        /*Variaveis auxiliares*/
         Palavra* p_devagar =  comeco_el;
         Palavra* p_rapido  =  comeco_el->proximo;
 
@@ -119,6 +139,7 @@ Palavra* acharMeioPalavra(Palavra *comeco_el, Palavra *ultimo_el){
         return p_devagar;
 }
 
+/*Busca uma palavra através de Busca Binária*/
 Palavra* buscaBinariaPalavra(Palavra *p, char* texto){
 
     Palavra* palavra_inicio = p;
@@ -150,6 +171,7 @@ Palavra* buscaBinariaPalavra(Palavra *p, char* texto){
     }
 }
 
+/*Retorna a categoria que está no meio da Lista de Categorias*/
 Categoria* acharMeioCategoria(Categoria* comeco_el, Categoria* ultimo_el){
 
         if (comeco_el == NULL){ return NULL; }
@@ -177,6 +199,7 @@ Categoria* acharMeioCategoria(Categoria* comeco_el, Categoria* ultimo_el){
         return p_devagar;
 }
 
+/*Busca uma categoria através de busca binária*/
 Categoria* buscaBinariaCategoria(Categoria *l, char* texto){
     /*Auxiliares*/
     Categoria* elemento_comeco = l;
@@ -193,7 +216,6 @@ Categoria* buscaBinariaCategoria(Categoria *l, char* texto){
             /*Adiciona +1 a frequencia da classificacao*/
             elemento_meio->qtd_palavras++;
             return elemento_meio;
-            //break;
         }
         else if(compare < 0){ elemento_ultimo = elemento_meio; }
         else if(compare > 0){ elemento_comeco = elemento_meio->proximo; }
@@ -207,6 +229,7 @@ Categoria* buscaBinariaCategoria(Categoria *l, char* texto){
     }
 }
 
+/*Insere Categoria na lista de categorias de forma ordenada*/
 int insereCategoria(Categoria *p_new, Categoria *p_elemento){
     int compare = strcmp(p_new->texto, p_elemento->texto);
     if (compare < 0)
@@ -242,6 +265,7 @@ int insereCategoria(Categoria *p_new, Categoria *p_elemento){
     return false;
 }
 
+/*Insere palavra na lista de palavras de forma ordenada*/
 int inserePalavra(Palavra *p_new, Palavra *p_palavra, Palavra **p_header){
 
     int compare = strcmp(p_new->texto,p_palavra->texto);
@@ -356,6 +380,7 @@ int insere(char* texto, char* raiz, char* categoria, double percentagem){
     return false;
 }
 
+/*Insere uma linha na lista de tabela de frequências do tamanho de uma palavra de forma ordenada*/
 int insereFrequenciaTamOrdenada(Frequencia** frequencia, Frequencia** header){
 
     if (frequencia == NULL){
@@ -410,8 +435,8 @@ int insereFrequenciaTamOrdenada(Frequencia** frequencia, Frequencia** header){
     return true;
 }
 
+/*Insere uma linha da tabela de Frequencias da categoria gramatical utilizada de forma ordenada*/
 int insereFrequenciaCatOrdenada(Frequencia** frequencia, Frequencia** header){
-
     if (frequencia == NULL){
         return false;
     }
@@ -453,6 +478,8 @@ int insereFrequenciaCatOrdenada(Frequencia** frequencia, Frequencia** header){
     return true;
 }
 
+/*Insere na lista de categorias a media e desvio padrão com base na certeza de etiquetação da palavra nesta categoria
+Como as categorias já estã ordenadas, insiro sempre no fim*/
 int insereMedDesv(MedDesvCat** med_desv){
 
     if(med_desv_h == NULL){
@@ -468,18 +495,36 @@ int insereMedDesv(MedDesvCat** med_desv){
     }
 
     return false;
-
 }
 
-/*Calcular frequencias absolutas, relativas e acumuladas, referente a categoria gramatical
-usada (terceira coluna do TXT). Apresentação da tabela ordenada por ordem crescente de frequencia
-absoluta*/
-int calcularFrequencias(Categoria* lista){
+/*
+  -------------------------------------------------------------------------------------------------
+  Descrição: Metodo responsável por calcular as frequencias e medidas das questões 2, 3, 4, 5, 6.
+  Aqui estará disposto um cabeçalho de forma que o trecho de código seja identificado e relacionado
+  a cada questão do Trabalho Prático. 
+  -------------------------------------------------------------------------------------------------
+  OBS.: Somente um método foi usado para realizar o processamento de dados destas questões de 
+  forma a otimizar a performance no cálculo de frequências e demais medidas, 
+  a fim de não realizar iterações desnecessárias.
+  -------------------------------------------------------------------------------------------------
+  Resolução Questão 2: COD-001 > Frequencias Categoria Gramatical.
+  Resolução Questão 3: COD-002 > Frequencias Tamanho das Palavras.
+  Resolução Questão 4: COD-003 > Para cada categoria, calcular media aritmetica e 
+                                 desvio padrão com base na certeza de etiquetação.
+  Resolução Questão 5: COD-004 > Medidas de localização e dispersão, relativas ao 
+                                 Tamanho das Palavras: média aritmética, mediana, moda e desvio padrão.
+  Resolução Questão 6: COD-005 > Calcular os valores de quartis, de acordo com a categoria gramatical,
+                                 para uso posteior na função getQuartil() que, dada uma palavra indicada 
+                                 pelo utilizador, permite obter, o quartil a que pertence.
+*/
+int calcFreqMed(Categoria* lista){
     Frequencia* frequencia;
     Categoria* categoria = lista;
     
     while(categoria != NULL){
-        /*Frequencia relativa a categoria de palavras*/
+        /*INI - COD-001
+        Frequencia relativa a categoria de palavras
+        */
         frequencia = (Frequencia *)malloc(sizeof(Frequencia));
         frequencia->proximo = NULL;
         strcpy(frequencia->variavel,categoria->texto);
@@ -488,19 +533,23 @@ int calcularFrequencias(Categoria* lista){
         frequencia->freq_abs_acumulada = 0;
         frequencia->freq_rel_acumulada = 0;
         insereFrequenciaCatOrdenada(&frequencia, &freq_categoria_h);
+        /*FIM - COD-001*/
 
-        //INICIO - QUESTAO 4
-        /*Média Aritmetica e desvio padrão das Categorias de Palavras com base na certeza de etiquetação*/
+        /*INI - COD-003
+        Média Aritmetica e desvio padrão das Categorias de Palavras com base na certeza de etiquetação
+        */
         MedDesvCat *med_desv_cat = (MedDesvCat *)malloc(sizeof(MedDesvCat));
         med_desv_cat->proximo = NULL;
         strcpy(med_desv_cat->categoria,categoria->texto);
         double somatorioCertezaFrequencia = 0;
         double media = 0;
-        //FIM - QUESTAO 4
+        /*FIM - COD-003*/
 
-        /*Frequencias: tamanho das palavras*/
         Palavra *palavra = categoria->palavra;
         while(palavra != NULL){
+            /*INI - COD-002
+            Frequencias: Tamanho das Palavras
+            */
             frequencia = (Frequencia *)malloc(sizeof(Frequencia));
             frequencia->proximo = NULL;
             char tamanho[20];
@@ -511,16 +560,15 @@ int calcularFrequencias(Categoria* lista){
             frequencia->freq_abs_acumulada = 0;
             frequencia->freq_rel_acumulada = 0;
             insereFrequenciaTamOrdenada(&frequencia, &freq_tamanho_palavra_h);
-            
-            somatorioCertezaFrequencia = somatorioCertezaFrequencia + 
-            (palavra->quantidade * palavra->percentagem); //QUESTAO 4
+            /*FIM COD-002*/
 
-            ma_tam_palavra = ma_tam_palavra + (palavra->tamanho*palavra->quantidade); //QUESTAO 5
+            somatorioCertezaFrequencia = somatorioCertezaFrequencia + (palavra->quantidade * palavra->percentagem); /*COD-003*/
+            ma_tam_palavra = ma_tam_palavra + (palavra->tamanho*palavra->quantidade); /*COD-004*/
 
             palavra = palavra->proximo;    
         }
 
-        //INICIO - QUESTAO 4
+        /*INI - COD-003*/
         media = (somatorioCertezaFrequencia/categoria->qtd_palavras);
         med_desv_cat->media_aritmetica = media;
         double variancia = 0;
@@ -529,15 +577,22 @@ int calcularFrequencias(Categoria* lista){
             variancia = variancia + pow(((palavra->percentagem - media)*palavra->quantidade),2);
             palavra = palavra->proximo;    
         }
-        variancia = variancia/(categoria->qtd_palavras - 1);
-        med_desv_cat->desvio_padrao = sqrt(variancia);;
+        if(categoria->qtd_palavras - 1 > 0){
+            variancia = variancia/(categoria->qtd_palavras - 1);
+            med_desv_cat->desvio_padrao = sqrt(variancia);
+        }
+        else{
+            med_desv_cat->desvio_padrao = 0;
+        }
         insereMedDesv(&med_desv_cat);
-        //FIM - QUESTAO 4
+        /*FIM - COD-003*/
 
         categoria = categoria->proximo;
     }
 
-    /*Guardo anterior e seto freq. absoluta e relativa acumuladas do primeiro elemento*/
+    /*INI - COD-001
+    Guardo anterior e seto freq. absoluta e relativa acumuladas do primeiro elemento para Frequencias de Categorias.
+    */
     Frequencia *frequencia_ant = freq_categoria_h;
     frequencia_ant->freq_abs_acumulada = frequencia_ant->freq_abs;
     frequencia_ant->freq_rel_acumulada = frequencia_ant->freq_rel;
@@ -549,14 +604,19 @@ int calcularFrequencias(Categoria* lista){
          frequencia_ant = frequencia;
          frequencia = frequencia->proximo;
     }
+    /*FIM COD-001*/
 
-    /*Guardo anterior e seto freq. absoluta e relativa acumuladas do primeiro elemento*/
+    /*INI - COD-002
+    Guardo anterior e seto freq. absoluta e relativa acumuladas do primeiro elemento para Frequencias de Tamanho de Palavras.
+    */
     frequencia_ant = freq_tamanho_palavra_h;
     frequencia_ant->freq_abs_acumulada = frequencia_ant->freq_abs;
     frequencia_ant->freq_rel_acumulada = frequencia_ant->freq_rel;
+    /*FIM - COD-002
 
-    /*Questao 5 Medidas de localização e dispersão: tamanho das palavras*/
-    //INICIO - QUESTAO 5
+    /*INI - COD-004
+     Medidas de localização e dispersão: tamanho das palavras
+    */
     ma_tam_palavra = ma_tam_palavra/totalPalavras;
 
     //Moda
@@ -575,13 +635,17 @@ int calcularFrequencias(Categoria* lista){
 
     //Variancia
     double variancia = pow(((tamanho - ma_tam_palavra)*maiorFrequencia),2);
+    /*FIM COD-004
 
-    /*Calculo demais frequencias acumuladas*/
+    /*INI - COD-002
+    Calculo demais frequencias acumuladas para Tamanho de Palavras
+    */
     frequencia = freq_tamanho_palavra_h->proximo;
     int posicao = 0;
+    
     while(frequencia != NULL){
+        /*INI COD-004*/
         tamanho = atoi(frequencia->variavel); //Variavel que contém o tamanho da palavra
-         /*Inicio - Questao5*/
          posicao++;
          if (posicao == posicao_mediana){
              mediana_tam_palavra = tamanho; //Posição da mediana recebe variavel de tamanho
@@ -591,54 +655,80 @@ int calcularFrequencias(Categoria* lista){
              moda_tam_palavra = tamanho;
          }
          variancia = variancia + pow(((tamanho - ma_tam_palavra)*frequencia->freq_abs),2);
-        /*Fim - Questao5*/
+        /*Fim COD-004*/
 
          frequencia->freq_abs_acumulada = frequencia->freq_abs + frequencia_ant->freq_abs_acumulada;
          frequencia->freq_rel_acumulada = frequencia->freq_rel + frequencia_ant->freq_rel_acumulada;
          frequencia_ant = frequencia;
          frequencia = frequencia->proximo;
     }
+    /*FIM - COD-002*/
+
+    /*INI COD-004*/
+    if(totalPalavras - 1 > 0){
+    //Variancia
     variancia = variancia/(totalPalavras-1);
-    //desvio padrao
-    desvio_padrao_tam_palavra = sqrt(variancia); //QUESTAO 5
-    
-    /*print da tabela de frequencias das categorias*/
-    frequencia = freq_categoria_h;
-    printf("\nTabela de Frequencias na quantidade de palavras de uma categoria:\n");
-    printf("%-10s%-10s%-10s%-10s%-10s\n", "X", "ni", "fi", "Ni", "Fi");
-    while(frequencia != NULL){
-        printf("%-10s%-10d%-10.2f%-10.d%-10.2f\n",frequencia->variavel, frequencia->freq_abs, 
-        frequencia->freq_rel, frequencia->freq_abs_acumulada, frequencia->freq_rel_acumulada);
-        frequencia = frequencia->proximo;
+    //Desvio padrao
+    desvio_padrao_tam_palavra = sqrt(variancia);
+    /*FIM COD-004*/
     }
+}
 
-    /*print da tabela de frequencias dos tamanhos das palavras*/
-    frequencia = freq_tamanho_palavra_h;
-    printf("\nTabela de Frequencias do tamanho das palavras:\n");
-    printf("%-10s%-10s%-10s%-10s%-10s\n", "X", "ni", "fi", "Ni", "Fi");
-    while(frequencia != NULL){
-        printf("%-10s%-10d%-10.2f%-10.d%-10.2f\n",frequencia->variavel, frequencia->freq_abs, 
-        frequencia->freq_rel, frequencia->freq_abs_acumulada, frequencia->freq_rel_acumulada);
-         frequencia = frequencia->proximo;
+/*Mostra tabela de frequencias de categorias com relação a sua quantidade de palavras*/
+void showFreqCategorias(){
+    if (freq_categoria_h != NULL){
+        Frequencia* frequencia = freq_categoria_h;
+        printf("\nTabela de Frequencias na quantidade de palavras de uma categoria:\n");
+        printf("%-10s%-10s%-10s%-10s%-10s\n", "X", "ni", "fi", "Ni", "Fi");
+        while(frequencia != NULL){
+            printf("%-10s%-10d%-10.2f%-10.d%-10.2f\n",frequencia->variavel, frequencia->freq_abs, 
+            frequencia->freq_rel, frequencia->freq_abs_acumulada, frequencia->freq_rel_acumulada);
+            frequencia = frequencia->proximo;
+        }
     }
-
-    /*print media, desvio padrão certeza das palavras de acordo com a categoria*/
-    MedDesvCat* elemento = med_desv_h;
-    while(elemento!=NULL){
-        printf("\n Media e Desvio Padrao\n");
-        printf("Categoria: %s | M: %.5lf | Desv: %.5lf\n",elemento->categoria,
-                                                     elemento->media_aritmetica,
-                                                     elemento->desvio_padrao);
-        elemento = elemento->proximo;
+    else{
+        printf("\nLista de Frequências de Categoria vazia!");
     }
+}
 
-    /*while(freq_tamanho_palavra_h!=NULL){
-        freq_tamanho_palavra_h =  frequencia->proximo;
-        free(frequencia);
-    }*/
+/*Mostra tabela de frequencias do tamanho das palavras*/
+void showFreqTamPalavras(){
+    if(freq_tamanho_palavra_h != NULL){
+        Frequencia* frequencia = freq_tamanho_palavra_h;
+        printf("\nTabela de Frequencias do tamanho das palavras:\n");
+        printf("%-10s%-10s%-10s%-10s%-10s\n", "X", "ni", "fi", "Ni", "Fi");
+        while(frequencia != NULL){
+            printf("%-10s%-10d%-10.2f%-10.d%-10.2f\n",frequencia->variavel, frequencia->freq_abs, 
+            frequencia->freq_rel, frequencia->freq_abs_acumulada, frequencia->freq_rel_acumulada);
+            frequencia = frequencia->proximo;
+        }
+    }
+    else
+    {
+        printf("\nLista de Frequências de Tamanho de Palavras vazia!");
+    }
+}
 
-    /*while(freq_categoria_h!=NULL){
-        freq_categoria_h =  frequencia->proximo;
-        free(frequencia);
-    }*/
+/*Mostra resultado das medias e desvio padrão das categorias de palavras com base na medida de etiquetação*/
+void showMedDesvCat(){
+    if(med_desv_h != NULL){
+        printf("\nTabela de Media e Desvio Padrao da categoria com base na etiquetacao:\n");
+        MedDesvCat* elemento = med_desv_h;
+        printf("%-20s%-20s%-20s\n", "Categoria", "Media Artimetica", "Desvio Padrao");
+        while(elemento!=NULL){
+            printf("%-20s%-20.5lf%-20.5lf\n",elemento->categoria, elemento->media_aritmetica,elemento->desvio_padrao);
+            elemento = elemento->proximo;
+        }
+    }
+    else
+    {
+        printf("\nLista de Medias e Desvios Padrões com base na etiquetação vazia!");
+    }
+}
+
+/*Mostra Medidas de Localização e Dispersão relativas ao tamanho das palavras*/
+void showLocDisp(){
+    printf("\nMedidas de localizacao e dispersao relativas ao tamanho das palavras:\n");
+    printf("%-20s%-20s%-20s%-20s\n", "Media Aritmetica", "Moda", "Mediana", "Desvio Padrao");
+    printf("%-20.5lf%-20d%-20.5lf%-20.5lf\n",ma_tam_palavra,moda_tam_palavra,mediana_tam_palavra,desvio_padrao_tam_palavra);
 }
