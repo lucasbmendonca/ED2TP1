@@ -39,6 +39,13 @@ typedef struct medDesvCat{
     struct medDesvCat *proximo; //Proxima informação de medidas.
 } MedDesvCat;
 
+/*Estrutura de Lista de frequencia das palavras para implementação de Quartil*/
+typedef struct freqPalavras{
+    char palavra[100];
+    int quantidade;
+    struct freqPalavras *proximo;
+} FreqPalavras;
+
 /*Inicio da lista de categorias com palavras.*/
 Categoria *categoria_header;
 
@@ -51,19 +58,27 @@ Frequencia *freq_tamanho_palavra_h;
 /*Inicio da lista de media e desvio padrão com base na certeza de etiquetação*/
 MedDesvCat *med_desv_h;
 
-/*Ultimo da lista*/
+/*Ultimo da lista de media e desvio padrao*/
 MedDesvCat *med_desv_ultimo;
+
+/*Inicio da Frequencia de Palavras*/
+FreqPalavras *freq_palavras_h;
 
 int totalCategorias = 0; //Total de categorias durante a execução do programa.
 int totalPalavras = 0; //Total de palavras lidas do arquivo.
 
-/*Medidas de localização e dispersao, relativas ao tamanho das palavras: media
+/*Medidas de localização e dispersao, relativas ao tamanho das palavras: media
 aritmetica, mediana, moda e desvio padrao.*/
 int totalTamanhoPalavras = 0; //Quantos diferentes tamanhos de palavras existem.
 double ma_tam_palavra = 0; //Média Aritmética dos tamanhos de palavras.
 double mediana_tam_palavra = 0; //Mediana dos tamanhos de palavras.
 int moda_tam_palavra = 0; //Moda dos tamanhos de palavras.
 double desvio_padrao_tam_palavra = 0; //Desvio padrão dos tamanhos de palavras.
+int somaFreqPalavras = 0; //Soma da quantidade de Frequencia das palavras.
+
+float quartil_1;
+float quartil_2;
+float quartil_3;
 
 Categoria* getResultado();
 void iniciar();
@@ -78,14 +93,18 @@ Categoria* buscaBinariaCategoria(Categoria *l, char* texto);
 
 int insereCategoria(Categoria *p_new, Categoria *p_elemento);
 int inserePalavra(Palavra  *p_new, Palavra *p_palavra, Palavra **p_header);
-int calcFreqMed(Categoria *lista); //Calcular frequencias e medidas das questões apresentadas no trabalho prático
-int insereFrequenciaCatOrdenada(Frequencia** frequencia, Frequencia** header); //Frequencia das categorias
-int insereFrequenciaTamOrdenada(Frequencia** frequencia, Frequencia** header); //Frequencia da incidencia do tamanho das palavras
-int insereMedDesv(MedDesvCat** med_desv); //Insere na lista de media e desvio padrão com base na etiquetação
+int calcFreqMed(Categoria *lista); //Calcular frequencias e medidas das questões apresentadas no trabalho prático.
+int insereFrequenciaCatOrdenada(Frequencia** frequencia, Frequencia** header); //Frequencia das categorias.
+int insereFrequenciaTamOrdenada(Frequencia** frequencia, Frequencia** header); //Frequencia da incidencia do tamanho das palavras.
+int insereMedDesv(MedDesvCat** med_desv); //Insere na lista de media e desvio padrão com base na etiquetação.
+int insereFreqPalavraOrdenada(Palavra* palavra); //Insere na lista de Frequencia das palavras.
+int getQuartil(char texto[]);
+void calculaQuartil(); //Calcula Quartis das Frequencias de Palavras;
 
 void showFreqTamPalavras();
 void showFreqCategorias();
 void showMedDesvCat();
 void showLocDisp();
+void showFreqPalavras();
 
 #endif // MORFOSSINTAXE_H_INCLUDED

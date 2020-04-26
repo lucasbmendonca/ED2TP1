@@ -65,6 +65,14 @@ int main()
     /*Questao 5 - Mostrar resultado das medidas de dispersão e localização relativas ao tamanho das palavras*/
     showLocDisp();
 
+    /*Questao 6 - Frequencia das palavras - Quartis*/
+    showFreqPalavras();
+    calculaQuartil();
+    char texto[100];
+    printf("\nDigite uma palavra para busca de quartil:");
+    scanf("%s",texto);
+    getQuartil(texto);
+
     /*Destroi todas as listas geradas pelo programa*/
     destroi();
 
