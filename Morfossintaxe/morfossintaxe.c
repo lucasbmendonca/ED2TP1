@@ -190,7 +190,7 @@ Palavra *buscaBinariaPalavra(Palavra *p, char *texto)
         int compare = strcmp(texto, palavra_meio->texto);
         if (compare == 0)
         {
-            totalPalavras++;
+            //totalPalavras++;
             return palavra_meio;
         }
         else if (compare < 0)
@@ -207,7 +207,7 @@ Palavra *buscaBinariaPalavra(Palavra *p, char *texto)
 
         if (palavra_meio == NULL || palavra_anterior == palavra_meio)
         {
-            totalPalavras++;
+            //totalPalavras++;
             return palavra_anterior;
         }
     }
@@ -412,6 +412,7 @@ int insere(char *texto, char *raiz, char *categoria, double percentagem)
 
     new_element->palavra = new_palavra;
     new_element->qtd_palavras = 1;
+    totalPalavras++;
 
     if (categoria_header == NULL)
     {
@@ -450,7 +451,7 @@ int insere(char *texto, char *raiz, char *categoria, double percentagem)
             { /*Se a categoria foi inserida com sucesso ou já existia na lista*/
                 palavra = buscaBinariaPalavra(palavra_header_temp, new_element->palavra->texto);
                 if (palavra != NULL)
-                {
+                {   
                     return inserePalavra(new_element->palavra, palavra, &categoria->palavra);
                 }
             }
@@ -665,6 +666,7 @@ int insereFrequenciaCertezaOrd(Palavra *palavra){
         FrequenciaCerteza* freq_certeza = (FrequenciaCerteza *)malloc(sizeof(FrequenciaCerteza));
         double percentagem = (double) palavra->percentagem * (double) 100.00000000000001;
         freq_certeza->certeza = percentagem;
+        freq_certeza->frequencia = palavra->quantidade;
         freq_certeza->proximo = NULL;
 
          if (freq_certeza_h == NULL)
@@ -1120,10 +1122,11 @@ void calcHistograma(){
 
         FrequenciaCerteza* elemento_atual = freq_certeza_h;
         FrequenciaCerteza* elemento_anterior;
+        soma_amplitude += menorCertezaHistograma;
         while(elemento_atual!=NULL){
-            frequencia += 1.0; 
+            frequencia += elemento_atual->frequencia; 
             if(elemento_atual->certeza > soma_amplitude){
-                limite_superior = elemento_anterior->certeza;
+                limite_superior = soma_amplitude; //elemento_anterior->certeza;
                 ponto_medio = (limite_superior+limite_inferior)/(double) 2.0;
                 insereHistograma(limite_inferior, limite_superior, frequencia, ponto_medio);
                 limite_inferior = soma_amplitude;
