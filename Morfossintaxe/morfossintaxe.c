@@ -687,10 +687,6 @@ int insereFrequenciaCertezaOrd(Palavra *palavra){
                     freq_certeza_h = freq_certeza;
                     return true;
                 }
-                if( freq_certeza->certeza == elemento_atual->certeza){
-                    elemento_atual->frequencia++;
-                    freq_certeza_h->frequencia = elemento_atual->frequencia;
-                }
                 //Inserindo entre dois elementos
                 freq_certeza->proximo = elemento_anterior->proximo;
                 elemento_anterior->proximo = freq_certeza;
@@ -872,14 +868,17 @@ int calcFreqMed(Categoria *lista)
     /*Total do Rol do Tamanho de palavras: verificar se é impar ou par para calcular a mediana*/
     if (totalPalavras % 2 != 0)
     {
-        posicao_mediana = ((totalTamanhoPalavras + 1) / 2);
+        posicao_mediana = ((totalPalavras + 1) / 2);
     }
     else
     {
-        float soma1 = (totalTamanhoPalavras/2);
+        float soma1 = (totalPalavras/2);
         float soma2 = ((totalPalavras + 1) / 2);
         posicao_mediana = ((soma1+soma2)/2);
     }
+
+    //Mediana variavel global
+    mediana_posicao = posicao_mediana;
 
     //Variancia
     double variancia = pow(((tamanho - ma_tam_palavra) * maiorFrequencia), 2);
@@ -895,8 +894,8 @@ int calcFreqMed(Categoria *lista)
     {
         /*INI COD-004*/
         tamanho = atoi(frequencia->variavel); //Variavel que contém o tamanho da palavra
-        posicao++;
-        if (posicao == posicao_mediana)
+        posicao += frequencia->freq_abs;
+        if (posicao >= posicao_mediana && mediana_tam_palavra == 0)
         {
             mediana_tam_palavra = tamanho; //Posição da mediana recebe variavel de tamanho
         }
@@ -992,8 +991,8 @@ void showMedDesvCat()
 void showLocDisp()
 {
     printf("\nMedidas de localizacao e dispersao relativas ao tamanho das palavras:\n");
-    printf("%-20s%-20s%-20s%-20s\n", "Media Aritmetica", "Moda", "Mediana", "Desvio Padrao");
-    printf("%-20.5lf%-20d%-20.5lf%-20.5lf\n", ma_tam_palavra, moda_tam_palavra, mediana_tam_palavra, desvio_padrao_tam_palavra);
+    printf("%-20s%-20s%-20s%-20s%-20s\n", "Media Aritmetica", "Moda", "Mediana Posicao", "Mediana Valor", "Desvio Padrao");
+    printf("%-20.5lf%-20d%-20d%-20d%-20.5lf\n", ma_tam_palavra, moda_tam_palavra, mediana_posicao, mediana_tam_palavra, desvio_padrao_tam_palavra);
 }
 
 /*Mostra Frequencia das palavras*/
@@ -1010,7 +1009,7 @@ void showFreqPalavras(){
 
 void calculaQuartil(){
     float mediana = 0;
-    int soma = somaFreqPalavras;
+    int soma = totalPalavras;
     //Quartil 2
     if(soma%2 != 0){
         mediana = ((soma + 1) / 2);
@@ -1037,7 +1036,7 @@ void calculaQuartil(){
     quartil_1 = mediana;
 
     //Quartil 3
-    soma = somaFreqPalavras + quartil_2 + 1;
+    soma = totalPalavras + quartil_2 + 1;
     if(soma%2 != 0){
         mediana = ((soma + 1) / 2);
     }
@@ -1057,9 +1056,10 @@ int getQuartil(char texto[]){
         FreqPalavras* frequencia = freq_palavras_h;
         int posicao = 0;
         while(frequencia!=NULL){
-            posicao++;
+            posicao += frequencia->quantidade;
             int compare = strcmp(texto, frequencia->palavra);
             if(compare == 0){
+                posicao = posicao - frequencia->quantidade + 1; 
                 if(posicao <= quartil_1){
                     printf("\nPalavra %s esta no Quartil 1. Posicao %d no Rol.", texto, posicao);
                     return true;
@@ -1123,7 +1123,9 @@ void calcHistograma(){
         FrequenciaCerteza* elemento_atual = freq_certeza_h;
         FrequenciaCerteza* elemento_anterior;
         soma_amplitude += menorCertezaHistograma;
+        int cont = 0;
         while(elemento_atual!=NULL){
+            cont += elemento_atual->frequencia;
             frequencia += elemento_atual->frequencia; 
             if(elemento_atual->certeza > soma_amplitude){
                 limite_superior = soma_amplitude; //elemento_anterior->certeza;
@@ -1137,7 +1139,7 @@ void calcHistograma(){
             elemento_atual = elemento_atual->proximo;
         }
         //Calculo para ultima classe
-        limite_superior = elemento_anterior->certeza;
+        limite_superior = limite_inferior + amplitude;
         ponto_medio = (limite_superior+limite_inferior)/(double) 2.0;
         insereHistograma(limite_inferior, limite_superior, frequencia, ponto_medio);
     }
@@ -1147,9 +1149,9 @@ void showHistograma(){
     if(histograma_h != NULL){
         Histograma* elemento = histograma_h;
         printf("\n\nHistograma:\n");
-        printf("\n%-20s%-20s%-20s", "Classes", "Frequencia abs.", "Ponto Medio"); 
+        printf("\n%-20s%-20s%-20s%-20s", "Classes", "Frequencia abs.", "Freq. rel.", "Ponto Medio"); 
         while(elemento != NULL){
-            printf("\n%-10.2lf%-10.2lf%-20.d%-20.2lf", elemento->limite_inferior, elemento->limite_superior, elemento->freq_abs, elemento->ponto_medio);
+            printf("\n%-10.2lf%-10.2lf%-20.d%-20.2lf%-20.2lf", elemento->limite_inferior, elemento->limite_superior, elemento->freq_abs, elemento->freq_rel, elemento->ponto_medio);
             elemento = elemento->proximo;
         }
     }

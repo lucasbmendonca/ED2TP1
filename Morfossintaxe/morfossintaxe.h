@@ -94,10 +94,11 @@ int totalPalavras = 0; //Total de palavras lidas do arquivo.
 aritmetica, mediana, moda e desvio padrao.*/
 int totalTamanhoPalavras = 0; //Quantos diferentes tamanhos de palavras existem.
 double ma_tam_palavra = 0; //Média Aritmética dos tamanhos de palavras.
-double mediana_tam_palavra = 0; //Mediana dos tamanhos de palavras.
+int mediana_tam_palavra = 0; //Mediana dos tamanhos de palavras.
 int moda_tam_palavra = 0; //Moda dos tamanhos de palavras.
 double desvio_padrao_tam_palavra = 0; //Desvio padrão dos tamanhos de palavras.
 int somaFreqPalavras = 0; //Soma da quantidade de Frequencia das palavras.
+int mediana_posicao = 0;
 
 float quartil_1;
 float quartil_2;
