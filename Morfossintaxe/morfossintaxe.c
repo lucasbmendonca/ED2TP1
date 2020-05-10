@@ -1010,7 +1010,7 @@ void showFreqPalavras(){
 void calculaQuartil(){
     float mediana = 0;
     int soma = totalPalavras;
-    //Quartil 2
+    //Quartil 2 
     if(soma%2 != 0){
         mediana = ((soma + 1) / 2);
     }
